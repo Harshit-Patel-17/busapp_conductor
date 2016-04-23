@@ -49,7 +49,7 @@ public class ConductActivity extends AppCompatActivity {
     private TextView seatAvailTextView;
     private Spinner busStopSpinner;
     private Switch busStatusSwitch;
-    private Button nextBusStopButton;
+    private Button nextBusStopButton, prevBusStopButton;
     private LocationManager locationManager;
     private LocationListener locationListener;
 
@@ -164,6 +164,17 @@ public class ConductActivity extends AppCompatActivity {
             }
         });
 
+        prevBusStopButton = (Button) findViewById(R.id.buttonPrevBusStop);
+        prevBusStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = busStopSpinner.getSelectedItemPosition();
+                int totalPositions = busStopSpinner.getAdapter().getCount();
+                int nextSelection = (totalPositions + currentPosition - 1) % totalPositions;
+                busStopSpinner.setSelection(nextSelection);
+            }
+        });
+
         //Initialize location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
@@ -194,8 +205,8 @@ public class ConductActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(checkPermissionsForLocation())
-            locationManager.removeUpdates(locationListener);
+        //if(checkPermissionsForLocation())
+        //    locationManager.removeUpdates(locationListener);
     }
 
     @Override
@@ -218,7 +229,7 @@ public class ConductActivity extends AppCompatActivity {
 
     private void requestLocationUpdates() {
         Log.e("Nothing", "doInBackground1: ");
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
     private void updateBusStatus() {
@@ -315,6 +326,8 @@ public class ConductActivity extends AppCompatActivity {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
                 httpHelper.deleteJson("/users/sign_out.json", user.getString("email"), user.getString("authentication_token"));
+                user.put("email", "");
+                user.put("authentication_token", "");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -325,9 +338,11 @@ public class ConductActivity extends AppCompatActivity {
     public class UpdateSeatAvailTask extends AsyncTask<Void, Void, Void> {
 
         private JSONObject params;
+        private String toast;
 
         public UpdateSeatAvailTask(SeatAvail seatAvail) {
             params = new JSONObject();
+            toast = null;
             try {
                 params.put("id", bus.getString("id"));
                 params.put("seat_avail", seatAvail.ordinal());
@@ -341,7 +356,14 @@ public class ConductActivity extends AppCompatActivity {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
                 JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                bus = jsonResonse.getJSONObject("bus");
+                if(jsonResonse != null) {
+                    if(bus.has("bus"))
+                        bus = jsonResonse.getJSONObject("bus");
+                    else
+                        toast = "You need to log in...";
+                } else {
+                    toast = "Connection problem...";
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -350,16 +372,21 @@ public class ConductActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            updateSeatAvailability();
+            if(toast != null)
+                Toast.makeText(getBaseContext(), toast, Toast.LENGTH_LONG).show();
+            else
+                updateSeatAvailability();
         }
     }
 
     public class UpdateBusStatusTask extends AsyncTask<Void, Void, Void> {
 
         private JSONObject params;
+        private String toast;
 
         public UpdateBusStatusTask(String status) {
             params = new JSONObject();
+            toast = null;
             try {
                 params.put("id", bus.getString("id"));
                 params.put("status", status);
@@ -373,7 +400,15 @@ public class ConductActivity extends AppCompatActivity {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
                 JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                bus = jsonResonse.getJSONObject("bus");
+                if(jsonResonse != null) {
+                    if(jsonResonse.has("bus"))
+                        bus = jsonResonse.getJSONObject("bus");
+                    else
+                        toast = "You need to log in...";
+                } else {
+                    toast = "Connection problem...";
+                }
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -382,16 +417,21 @@ public class ConductActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            updateBusStatus();
+            if(toast != null)
+                Toast.makeText(getBaseContext(), toast, Toast.LENGTH_LONG).show();
+            else
+                updateBusStatus();
         }
     }
 
     public class UpdateNextBusStop extends AsyncTask<Void, Void, Void> {
 
         private JSONObject params;
+        private String toast;
 
         public UpdateNextBusStop(String busStopId) {
             params = new JSONObject();
+            toast = null;
             try {
                 params.put("id", bus.getString("id"));
                 params.put("bus_stop_id", busStopId);
@@ -405,7 +445,14 @@ public class ConductActivity extends AppCompatActivity {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
                 JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                bus = jsonResonse.getJSONObject("bus");
+                if(jsonResonse != null) {
+                    if(jsonResonse.has("bus"))
+                        bus = jsonResonse.getJSONObject("bus");
+                    else
+                        toast = "You need to log in...";
+                } else {
+                    toast = "Connection problem...";
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -414,6 +461,8 @@ public class ConductActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            if(toast != null)
+                Toast.makeText(getBaseContext(), toast, Toast.LENGTH_LONG).show();
             //updateBusStatus();
         }
     }
@@ -421,9 +470,11 @@ public class ConductActivity extends AppCompatActivity {
     public class UpdateBusPosition extends AsyncTask<Void, Void, Void> {
 
         private JSONObject params;
+        private String toast;
 
         public UpdateBusPosition(double lat, double lng) {
             params = new JSONObject();
+            toast = null;
             try {
                 params.put("latitude", lat);
                 params.put("longitude", lng);
@@ -437,7 +488,14 @@ public class ConductActivity extends AppCompatActivity {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
                 JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                bus = jsonResonse.getJSONObject("bus");
+                if(jsonResonse != null) {
+                    if(jsonResonse.has("bus"))
+                        bus = jsonResonse.getJSONObject("bus");
+                    else
+                        toast = "You need to log in...";
+                } else {
+                    toast = "Connection problem...";
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -446,6 +504,8 @@ public class ConductActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            if(toast != null)
+                Toast.makeText(getBaseContext(), toast, Toast.LENGTH_LONG).show();
             //updateBusStatus();
         }
     }
