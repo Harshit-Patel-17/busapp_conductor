@@ -311,8 +311,8 @@ public class ConductActivity extends AppCompatActivity {
                 // TODO: Logout and switch to login activity
                 UserLogoutTask userLogoutTask = new UserLogoutTask();
                 userLogoutTask.execute((Void)null);
-                Intent getActivityLoginIntent = new Intent(this, LoginActivity.class);
-                startActivity(getActivityLoginIntent);
+                //Intent getActivityLoginIntent = new Intent(this, LoginActivity.class);
+                //startActivity(getActivityLoginIntent);
                 break;
 
         }
@@ -332,6 +332,11 @@ public class ConductActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             return (Void)null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            finish();
         }
     }
 
@@ -355,10 +360,10 @@ public class ConductActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
-                JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                if(jsonResonse != null) {
-                    if(bus.has("bus"))
-                        bus = jsonResonse.getJSONObject("bus");
+                JSONObject jsonResponse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
+                if(jsonResponse != null) {
+                    if(jsonResponse.has("bus"))
+                        bus = jsonResponse.getJSONObject("bus");
                     else
                         toast = "You need to log in...";
                 } else {
@@ -399,10 +404,10 @@ public class ConductActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
-                JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                if(jsonResonse != null) {
-                    if(jsonResonse.has("bus"))
-                        bus = jsonResonse.getJSONObject("bus");
+                JSONObject jsonResponse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
+                if(jsonResponse != null) {
+                    if(jsonResponse.has("bus"))
+                        bus = jsonResponse.getJSONObject("bus");
                     else
                         toast = "You need to log in...";
                 } else {
@@ -444,10 +449,10 @@ public class ConductActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
-                JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                if(jsonResonse != null) {
-                    if(jsonResonse.has("bus"))
-                        bus = jsonResonse.getJSONObject("bus");
+                JSONObject jsonResponse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
+                if(jsonResponse != null) {
+                    if(jsonResponse.has("bus"))
+                        bus = jsonResponse.getJSONObject("bus");
                     else
                         toast = "You need to log in...";
                 } else {
@@ -487,10 +492,10 @@ public class ConductActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 HttpHelper httpHelper = new HttpHelper("http://" + getResources().getString(R.string.server_ip_port));
-                JSONObject jsonResonse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
-                if(jsonResonse != null) {
-                    if(jsonResonse.has("bus"))
-                        bus = jsonResonse.getJSONObject("bus");
+                JSONObject jsonResponse = httpHelper.putJson("/buses/" + bus.getString("id") + ".json", params, user.getString("email"), user.getString("authentication_token"));
+                if(jsonResponse != null) {
+                    if(jsonResponse.has("bus"))
+                        bus = jsonResponse.getJSONObject("bus");
                     else
                         toast = "You need to log in...";
                 } else {
