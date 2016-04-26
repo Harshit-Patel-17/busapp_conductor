@@ -2,7 +2,7 @@
     <string name="app_name">Bus App Conductor</string>
 
     <!-- Server IP address and port -->
-    <string name="server_ip_port">10.192.35.105:3000</string>
+    <string name="server_ip_port">10.237.27.221:3000</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
